@@ -1,0 +1,78 @@
+// Copyright 2021 logmesh.io
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package logmesh.bot.v1;
+
+import "logmesh/type/filter.proto";
+import "logmesh/type/income_transaction.proto";
+
+option go_package = "github.com/logmesh/go-genproto/bot/v1;bot_pb";
+
+service Bot {
+  rpc GetBalance(PaymentSystemCurrencyRequest) returns (BalanceResponse) {} // баланс всего в выбранной валюте и платежной системе
+  rpc GetUserAddress(PaymentSystemCurrencyUserRequest) returns (GetUserAddressResponse) {} // отобразить адрес пользователя
+  rpc GetUserBalance(PaymentSystemCurrencyUserRequest) returns (BalanceResponse) {} // баланс пользователя в выбранной валюте и платежной системе
+  rpc GetIncomeTransaction(GetIncomeTransactionRequest) returns (GetIncomeTransactionResponse) {} // список входящих транзакций по txid (идентификатору транзакции)
+  rpc GetIncomeTransactions(GetIncomeTransactionsRequest) returns (GetIncomeTransactionResponse) {} // список входящих транзакций с отступом по log_id (идентификатору изменений)
+}
+
+message Error {
+  enum Id {
+    OK = 0;
+    NOT_FOUND = 1;
+    UNAVAILABLE = 2;
+    CURRENCY_UNKNOWN = 3;
+    CURRENCY_UNAVAILABLE = 4;
+    CURRENCY_UNSUPPORTED = 5;
+    PAYMENT_SYSTEM_UNKNOWN = 6;
+    PAYMENT_SYSTEM_UNAVAILABLE = 7;
+    PAYMENT_SYSTEM_UNSUPPORTED = 8;
+  }
+  Id error_id = 1;
+  string message = 2;
+}
+
+message PaymentSystemCurrencyRequest {
+  string payment_system = 1; // example: TRON
+  string currency = 2; // example: USDT
+}
+message PaymentSystemCurrencyUserRequest {
+  string payment_system = 1;
+  string currency = 2;
+  uint32 user_id = 3;
+}
+message GetIncomeTransactionRequest {
+  string payment_system = 1;
+  string currency = 2;
+  string txid = 3;
+}
+message GetIncomeTransactionsRequest {
+  string payment_system = 1;
+  string currency = 2;
+  logmesh.type.Filter filter = 3;
+}
+message GetIncomeTransactionResponse {
+  Error.Id error_id = 1;
+  repeated logmesh.type.IncomeTransaction transactions = 2;
+}
+message BalanceResponse {
+  Error.Id error_id = 1;
+  string balance = 2;
+}
+message GetUserAddressResponse {
+  Error.Id error_id = 1;
+  string address = 2;
+}
