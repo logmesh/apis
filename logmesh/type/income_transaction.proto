@@ -24,13 +24,12 @@ message IncomeTransaction {
     APPROVED = 1;
     REJECT = 2;
   }
-  uint32 user_id = 1; // идентификатор пользователя
+  uint32 account_id = 1; // идентификатор пользователя
   string txid = 2; // хэш транзакции
   string trace_id = 3; // идентификатор операции в пределах транзакции (txid)
   string amount = 4; // сумма
   string address = 5; // адрес получателя
   uint64 block_num = 6; // порядковый номер блока
-  string block_hash = 7; // хэш блока
-  Status status_id = 8; // статус транзакции
-  uint64 log_id = 9; // идентификатор изменения (актуальным состоянием, является наибольшее значение "log_id" для уникального ключа ["payment_system" + "currency" + "txid"])
+  Status status_id = 7; // статус транзакции
+  uint64 log_id = 8; // идентификатор изменения (актуальным состоянием, является наибольшее значение "log_id" для уникального ключа ["payment_system" + "currency" + "txid"])
 }
