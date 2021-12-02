@@ -22,57 +22,110 @@ import "logmesh/type/income_transaction.proto";
 option go_package = "github.com/logmesh/go-genproto/bot/v1;bot_pb";
 
 service Bot {
-  rpc GetBalance(PaymentSystemCurrencyRequest) returns (BalanceResponse) {} // баланс всего в выбранной валюте и платежной системе
-  rpc GetUserAddress(PaymentSystemCurrencyUserRequest) returns (GetUserAddressResponse) {} // отобразить адрес пользователя
-  rpc GetUserBalance(PaymentSystemCurrencyUserRequest) returns (BalanceResponse) {} // баланс пользователя в выбранной валюте и платежной системе
-  rpc GetIncomeTransaction(GetIncomeTransactionRequest) returns (GetIncomeTransactionResponse) {} // список входящих транзакций по txid (идентификатору транзакции)
-  rpc GetIncomeTransactions(GetIncomeTransactionsRequest) returns (GetIncomeTransactionResponse) {} // список входящих транзакций с отступом по log_id (идентификатору изменений)
+  rpc GetLastBlockNum(PaymentSystemRequest) returns (BlockNum) {} // отобразить последний идентификатор блока
+
+  rpc GetTotalBalance(AccountTypeRequest) returns (BalanceResponse) {} // баланс всего
+  rpc GetAsset20TotalBalance(Asset20AccountTypeRequest) returns (BalanceResponse) {} // баланс токенов всего
+
+  rpc GetAddress(AccountAddressRequest) returns (AddressResponse) {} // отобразить адрес аккаунта
+  rpc CheckAddressFormat(AddressRequest) returns (Error) {} // проверить формат адрес
+
+  rpc GetAccountBalance(AccountRequest) returns (BalanceResponse) {} // баланс аккаунта
+  rpc GetAsset20AccountBalance(Asset20AccountRequest) returns (BalanceResponse) {} // баланс токенов аккаунта
+
+  rpc GetIncomeTransaction(IncomeTransactionRequest) returns (IncomeTransactionResponse) {} // список входящих транзакций по txid (идентификатору транзакции)
+  rpc GetAsset20IncomeTransaction(Asset20IncomeTransactionRequest) returns (IncomeTransactionResponse) {} // список входящих транзакций с токенами по txid (идентификатору транзакции)
+
+  rpc GetIncomeTransactions(IncomeTransactionsRequest) returns (IncomeTransactionResponse) {} // список входящих транзакций с отступом по log_id (идентификатору изменений)
+  rpc GetAsset20IncomeTransactions(Asset20IncomeTransactionsRequest) returns (IncomeTransactionResponse) {} // список входящих транзакций с токенами с отступом по log_id (идентификатору изменений)
 }
 
+message PaymentSystemRequest {
+  string payment_system = 1;
+}
+message BlockNum {
+  uint64 block_num = 1; // порядковый номер блока
+}
 message Error {
   enum Id {
     OK = 0;
     NOT_FOUND = 1;
     UNAVAILABLE = 2;
-    CURRENCY_UNKNOWN = 3;
-    CURRENCY_UNAVAILABLE = 4;
-    CURRENCY_UNSUPPORTED = 5;
+    WRONG_ACCOUNT = 3;
+    WRONG_ADDRESS = 4;
+    WRONG_TXID = 5;
     PAYMENT_SYSTEM_UNKNOWN = 6;
     PAYMENT_SYSTEM_UNAVAILABLE = 7;
     PAYMENT_SYSTEM_UNSUPPORTED = 8;
   }
   Id error_id = 1;
-  string message = 2;
 }
-
-message PaymentSystemCurrencyRequest {
-  string payment_system = 1; // example: TRON
-  string currency = 2; // example: USDT
+message AccountType {
+  enum Id {
+    USER = 0;
+    COMPANY = 1;
+  }
+  Id account_type = 1;
 }
-message PaymentSystemCurrencyUserRequest {
+message AccountTypeRequest {
   string payment_system = 1;
-  string currency = 2;
-  uint32 user_id = 3;
+  AccountType.Id account_type = 2;
 }
-message GetIncomeTransactionRequest {
+message Asset20AccountTypeRequest {
   string payment_system = 1;
-  string currency = 2;
-  string txid = 3;
-}
-message GetIncomeTransactionsRequest {
-  string payment_system = 1;
-  string currency = 2;
-  logmesh.type.Filter filter = 3;
-}
-message GetIncomeTransactionResponse {
-  Error.Id error_id = 1;
-  repeated logmesh.type.IncomeTransaction transactions = 2;
+  AccountType.Id account_type = 2;
+  string contract = 3;
 }
 message BalanceResponse {
   Error.Id error_id = 1;
   string balance = 2;
 }
-message GetUserAddressResponse {
+message AccountAddressRequest {
+  string payment_system = 1;
+  AccountType.Id account_type = 2;
+  uint32 account_id = 3;
+  bool create_if_not_exists = 4;
+}
+message AccountRequest {
+  string payment_system = 1;
+  AccountType.Id account_type = 2;
+  uint32 account_id = 3;
+}
+message Asset20AccountRequest {
+  string payment_system = 1;
+  AccountType.Id account_type = 2;
+  uint32 account_id = 3;
+  string contract = 4;
+}
+message AddressRequest {
+  string payment_system = 1;
+  string address = 2;
+}
+message AddressResponse {
   Error.Id error_id = 1;
   string address = 2;
+}
+message IncomeTransactionRequest {
+  string payment_system = 1;
+  string txid = 2;
+}
+message Asset20IncomeTransactionRequest {
+  string payment_system = 1;
+  string txid = 2;
+  string contract = 3;
+}
+message IncomeTransactionsRequest {
+  string payment_system = 1;
+  AccountType.Id account_type = 2;
+  logmesh.type.Filter filter = 3;
+}
+message Asset20IncomeTransactionsRequest {
+  string payment_system = 1;
+  AccountType.Id account_type = 2;
+  logmesh.type.Filter filter = 3;
+  string contract = 4;
+}
+message IncomeTransactionResponse {
+  Error.Id error_id = 1;
+  repeated logmesh.type.IncomeTransaction transactions = 2;
 }
