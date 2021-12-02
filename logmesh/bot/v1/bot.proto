@@ -40,12 +40,6 @@ service Bot {
   rpc GetAsset20IncomeTransactions(Asset20IncomeTransactionsRequest) returns (IncomeTransactionResponse) {} // список входящих транзакций с токенами с отступом по log_id (идентификатору изменений)
 }
 
-message PaymentSystemRequest {
-  string payment_system = 1;
-}
-message BlockNum {
-  uint64 block_num = 1; // порядковый номер блока
-}
 message Error {
   enum Id {
     OK = 0;
@@ -59,6 +53,13 @@ message Error {
     PAYMENT_SYSTEM_UNSUPPORTED = 8;
   }
   Id error_id = 1;
+}
+message PaymentSystemRequest {
+  string payment_system = 1;
+}
+message BlockNum {
+  Error.Id error_id = 1;
+  uint64 block_num = 2;
 }
 message AccountType {
   enum Id {
